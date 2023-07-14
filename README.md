@@ -13,7 +13,7 @@ It is recommended to have blobd running behind a reverse proxy such as
 [Caddy](https://caddyserver.com/) or [Nginx](https://www.nginx.com/) if you want
 features such as SSL or load balancing.
 
-You can try the HTTP endpoints at [blob.atscan.net](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae).
+You can try the application at [blob.atscan.net](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae), which is a publicly accessible instance.
 
 ### Features
 
