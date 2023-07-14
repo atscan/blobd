@@ -65,6 +65,10 @@ func Get(dir string, did string, cidStr string) (Blob, error) {
 	if !ok {
 		return blob, errors.New("invalid repository location")
 	}
+	// update did if differ from resolved (when using handle, for example)
+	if did != dat["did"].(string) {
+		did = dat["did"].(string)
+	}
 
 	// get from PDS
 	url := fmt.Sprintf("%v/xrpc/com.atproto.sync.getBlob?did=%v&cid=%v", pds, did, cidStr)
