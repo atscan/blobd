@@ -24,9 +24,28 @@ go install github.com/atscan/blobd@latest
 
 ## Usage
 
+Starting the server on port `3000` and caching the blobs in `/path/to/data`:
 ```bash
-# starting the server on port 3000 and caching the blobs in /path/to/data
 blobd -d /path/to/data -p 3000
+```
+
+Try it out to see if it works:
+```bash
+http localhost:3000/did:plc:ewvi7nxzyoun6zhxrhs64oiz/bafkreibjfgx2gprinfvicegelk5kosd6y2frmqpqzwqkg7usac74l3t2v4
+```
+
+Result:
+```httpie
+HTTP/1.1 200 OK
+Content-Length: 86984
+Content-Type: image/jpeg
+Date: Fri, 14 Jul 2023 09:38:55 GMT
+
+
+
++-----------------------------------------+
+| NOTE: binary data not shown in terminal |
++-----------------------------------------+
 ```
 
 ## Authors
