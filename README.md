@@ -18,11 +18,11 @@ You can try the application at [blob.atscan.net](https://blob.atscan.net/did:plc
 ### Features
 
 - automatic blob discovery (using atscan api)
+- on-fly image transfomations (jpeg->webp, different resolutions)
 - file storage/cache
 
 ### TODO
 
-- image transformations (resolutions, formats, incl. webp)
 - transport compression
 - storage/cache compression (zstd?)
 - pre-fetching of blobs from PDS
@@ -33,7 +33,9 @@ You can try the application at [blob.atscan.net](https://blob.atscan.net/did:plc
 
 | Method | Path         | Name         | Examples |
 | ------ | ------------ | ------------ | -------- |
-| GET    | `/:did/:cid` | Get the blob | [(1)](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae), [(2)](https://blob.atscan.net/did:plc:ewvi7nxzyoun6zhxrhs64oiz/bafkreibjfgx2gprinfvicegelk5kosd6y2frmqpqzwqkg7usac74l3t2v4) |
+| GET    | `/<did>/<cid>` | Get the blob | [(1)](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae), [(2)](https://blob.atscan.net/did:plc:ewvi7nxzyoun6zhxrhs64oiz/bafkreibjfgx2gprinfvicegelk5kosd6y2frmqpqzwqkg7usac74l3t2v4) |
+| GET    | `/<did>/<cid>.webp` | Get the image blob in webp | [(1)](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae.webp), [(2)](https://blob.atscan.net/did:plc:ewvi7nxzyoun6zhxrhs64oiz/bafkreibjfgx2gprinfvicegelk5kosd6y2frmqpqzwqkg7usac74l3t2v4.webp) |
+| GET    | `/<did>/<cid>.<width>px.webp` | Get the image in different resolution (only webp for now) | [(1)](https://blob.atscan.net/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreic5kmqlhrhbfnh2bx6fsetvkra4noqja5ngsnnadrvubd6jcoc3ae.150px.webp), [(2)](https://blob.atscan.net/did:plc:ewvi7nxzyoun6zhxrhs64oiz/bafkreibjfgx2gprinfvicegelk5kosd6y2frmqpqzwqkg7usac74l3t2v4.150px.webp) |
 
 ## Usage
 
