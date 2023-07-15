@@ -39,11 +39,23 @@ You can try the application at [blob.atscan.net](https://blob.atscan.net/did:plc
 
 ## Usage
 
-### Installation
-
 Requires:
 
 - go 1.20+
+- libwebp
+
+### Install Dependencies
+
+#### Linux
+```bash
+sudo apt-get update
+sudo apt-get install libwebp-dev
+```
+#### Mac OS
+```bash
+```
+
+### Install
 
 You can install the application using this command:
 
