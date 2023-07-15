@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -56,17 +58,35 @@ func serve(cctx *cli.Context) error {
 		if strings.Index(cid, "baf") != 0 {
 			return c.SendStatus(404)
 		}
+		r, _ := regexp.Compile("^([^\\.]+)(\\.([0-9]+)(x[0-9]+|)px|)\\.(webp)$")
+		var of string = "raw"
+		ofc := blob.OutputFormatOptions{}
+		if m := r.FindStringSubmatch(cid); len(m) == 6 {
+			cid = m[1]
+			of = m[5]
+			if m[3] != "" {
+				ofc.Width, _ = strconv.Atoi(m[3])
+			}
+			/*if m[4] != "" {
+				ofc.Height, _ = strconv.Atoi(m[4])
+			}*/
+		}
 
+		// get blob
 		blob, err := blob.Get(dir, did, cid)
 		if err != nil {
 			log.Println("Error: ", err)
 			return c.SendStatus(404)
 		}
+		out, err := blob.Output(dir, of, ofc)
+		if err != nil {
+			return c.SendStatus(500)
+		}
 
-		c.Set("Content-Type", blob.ContentType)
+		c.Set("Content-Type", out.ContentType)
 
 		fmt.Printf("%v %v [%v]\n", c.Method(), c.Path(), time.Since(start))
-		return c.Send(blob.Data)
+		return c.Send(out.Body())
 	})
 
 	server.Get("/", func(c *fiber.Ctx) error {
