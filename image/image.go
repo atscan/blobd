@@ -2,7 +2,10 @@ package image
 
 import (
 	"bytes"
+	"errors"
+	"image"
 	"image/jpeg"
+	"image/png"
 	"io/ioutil"
 	"log"
 
@@ -11,18 +14,34 @@ import (
 	"github.com/kolesa-team/go-webp/webp"
 )
 
-func TransformToWebP(b []byte, width int, height int) ([]byte, error) {
+func TransformToWebP(format string, b []byte, width int, height int) ([]byte, error) {
 
-	img, err := jpeg.Decode(bytes.NewBuffer(b))
+	lossless := false
+	var img image.Image
+	var err error
+	if format == "image/jpeg" {
+		img, err = jpeg.Decode(bytes.NewBuffer(b))
+	} else if format == "image/png" {
+		img, err = png.Decode(bytes.NewBuffer(b))
+		lossless = true
+	} else {
+		return nil, errors.New("Cannot load image format: " + format)
+	}
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 	if width > 0 {
 		img = imaging.Resize(img, width, height, imaging.Lanczos)
 	}
 
 	buf := bytes.NewBuffer([]byte(""))
-	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+	var options *encoder.Options
+	if lossless {
+		options, err = encoder.NewLosslessEncoderOptions(encoder.PresetDefault, 0)
+	} else {
+		options, err = encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+	}
 	if err != nil {
 		log.Fatalln(err)
 		return nil, err

@@ -224,7 +224,7 @@ func (b *Blob) Output(dir string, of string, ofc OutputFormatOptions) (BlobOutpu
 					return out, err
 				}
 			}
-			d, err = image.TransformToWebP(raw, ofc.Width, ofc.Height)
+			d, err = image.TransformToWebP(b.Mime, raw, ofc.Width, ofc.Height)
 			if err != nil {
 				return out, err
 			}
