@@ -9,16 +9,23 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/gabriel-vasile/mimetype"
 	cid "github.com/ipfs/go-cid"
 )
+
+const IndexVersion = 0x01
 
 type Blob struct {
 	Cid         cid.Cid    `json:"-"`
 	Size        int        `json:"size"`
 	ContentType string     `json:"contentType"`
+	Mime        string     `json:"mime"`
 	Data        []byte     `json:"-"`
 	Source      BlobSource `json:"source"`
+	Time        string     `json:"time"`
+	Version     uint8      `json:"version"`
 }
 
 type BlobSource struct {
@@ -39,13 +46,15 @@ func Get(dir string, did string, cidStr string) (Blob, error) {
 		return blob, errors.New("invalid cid, not equal")
 	}
 
-	if err := blob.FileLoad(dir); err == nil {
+	// try to load from local storage (cache)
+	if err := blob.FileLoad(dir); err == nil && blob.Version == IndexVersion {
 		return blob, nil
 	}
 
 	// find repository location
 	resp, err := http.Get(fmt.Sprintf("https://api.atscan.net/%v", did))
 	if err != nil {
+		log.Println("Cannot get data from atscan api")
 		return blob, err
 	}
 	defer resp.Body.Close()
@@ -106,12 +115,15 @@ func Get(dir string, did string, cidStr string) (Blob, error) {
 
 	blob.Data = body
 	blob.ContentType = ct
+	blob.Mime = mimetype.Detect(body).String()
 	blob.Size = len(body)
 	blob.Source = BlobSource{
 		Pds: pds,
 		Did: did,
 		Url: url,
 	}
+	blob.Time = time.Now().Format(time.RFC3339)
+	blob.Version = IndexVersion
 
 	blob.FileSave(dir)
 
