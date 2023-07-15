@@ -17,7 +17,9 @@ func TransformToWebP(b []byte, width int, height int) ([]byte, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	img = imaging.Resize(img, width, height, imaging.Lanczos)
+	if width > 0 {
+		img = imaging.Resize(img, width, height, imaging.Lanczos)
+	}
 
 	buf := bytes.NewBuffer([]byte(""))
 	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
