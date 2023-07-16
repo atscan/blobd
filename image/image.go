@@ -16,16 +16,12 @@ import (
 )
 
 type ImageProperties struct {
-	Width    int  `json:"width"`
-	Height   int  `json:"height"`
-	Lossless bool `json:"lossless"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
-func GetProperties(format string, b []byte, ll bool) (*ImageProperties, error) {
+func GetProperties(format string, b []byte) (*ImageProperties, error) {
 	r := ImageProperties{}
-	if ll {
-		r.Lossless = true
-	}
 	img, _, err := image.DecodeConfig(bytes.NewBuffer(b))
 	fmt.Println(img)
 	if err != nil {
@@ -33,10 +29,6 @@ func GetProperties(format string, b []byte, ll bool) (*ImageProperties, error) {
 	}
 	r.Width = img.Width
 	r.Height = img.Height
-	switch format {
-	case "image/png":
-		r.Lossless = true
-	}
 	return &r, nil
 }
 

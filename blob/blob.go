@@ -137,7 +137,7 @@ func Get(dir string, did string, cidStr string) (Blob, error) {
 	}
 
 	mime := mimetype.Detect(body).String()
-	ip, err := image.GetProperties(mime, body, false)
+	ip, err := image.GetProperties(mime, body)
 
 	// construct index
 	blob.Data = body
@@ -258,7 +258,7 @@ func (b *Blob) Output(dir string, of *string, ofc *OutputFormatOptions) (BlobOut
 				return out, err
 			}
 
-			ip, _ := image.GetProperties(mime, d, true)
+			ip, _ := image.GetProperties(mime, d)
 			b.Variants = append(b.Variants, BlobVariant{
 				Size:  len(d),
 				Mime:  mime,
