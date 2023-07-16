@@ -103,12 +103,15 @@ func response(c *fiber.Ctx, dir string, of *string, ofc *blob.OutputFormatOption
 		ofc = &blob.OutputFormatOptions{}
 		if m["width"] != "" {
 			ofc.Width, _ = strconv.Atoi(m["width"])
+			if ofc.Width > 1000 {
+				return c.SendStatus(400)
+			}
 		}
 	}
 	out, err := b.Output(dir, of, ofc)
 	if err != nil {
 		log.Printf("Error: %v\n", err)
-		return c.SendStatus(500)
+		return c.SendStatus(400)
 	}
 	c.Set("Content-Type", out.ContentType)
 
