@@ -3,6 +3,7 @@ package image
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -14,8 +15,32 @@ import (
 	"github.com/kolesa-team/go-webp/webp"
 )
 
-func TransformToWebP(format string, b []byte, width int, height int) ([]byte, error) {
+type ImageProperties struct {
+	Width    int  `json:"width"`
+	Height   int  `json:"height"`
+	Lossless bool `json:"lossless"`
+}
 
+func GetProperties(format string, b []byte, ll bool) (*ImageProperties, error) {
+	r := ImageProperties{}
+	if ll {
+		r.Lossless = true
+	}
+	img, _, err := image.DecodeConfig(bytes.NewBuffer(b))
+	fmt.Println(img)
+	if err != nil {
+		return nil, err
+	}
+	r.Width = img.Width
+	r.Height = img.Height
+	switch format {
+	case "image/png":
+		r.Lossless = true
+	}
+	return &r, nil
+}
+
+func TransformToWebP(format string, b []byte, width int, height int) ([]byte, error) {
 	lossless := false
 	var img image.Image
 	var err error

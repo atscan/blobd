@@ -19,20 +19,29 @@ import (
 const IndexVersion = 0x01
 
 type Blob struct {
-	Cid         cid.Cid    `json:"-"`
-	Size        int        `json:"size"`
-	ContentType string     `json:"contentType"`
-	Mime        string     `json:"mime"`
-	Data        []byte     `json:"-"`
-	Source      BlobSource `json:"source"`
-	Time        string     `json:"time"`
-	Version     uint8      `json:"version"`
+	Cid      cid.Cid                `json:"-"`
+	Size     int                    `json:"size"`
+	Mime     string                 `json:"mime"`
+	Image    *image.ImageProperties `json:"image"`
+	Data     []byte                 `json:"-"`
+	Source   BlobSource             `json:"source"`
+	Variants []BlobVariant          `json:"variants"`
+	Time     string                 `json:"time"`
+	Version  uint8                  `json:"version"`
 }
 
 type BlobSource struct {
-	Pds string `json:"pds"`
-	Did string `json:"did"`
-	Url string `json:"url"`
+	Pds  string `json:"pds"`
+	Did  string `json:"did"`
+	Url  string `json:"url"`
+	Mime string `json:"mime"`
+}
+
+type BlobVariant struct {
+	Size  int                    `json:"size"`
+	Mime  string                 `json:"mime"`
+	Image *image.ImageProperties `json:"image"`
+	Time  string                 `json:"time"`
 }
 
 type BlobOutput struct {
@@ -127,12 +136,15 @@ func Get(dir string, did string, cidStr string) (Blob, error) {
 		return blob, errors.New("Bad hash")
 	}
 
+	mime := mimetype.Detect(body).String()
+	ip, err := image.GetProperties(mime, body, false)
+
 	// construct index
 	blob.Data = body
-	blob.ContentType = ct
-	blob.Mime = mimetype.Detect(body).String()
+	blob.Mime = mime
 	blob.Size = len(body)
-	blob.Source = BlobSource{Pds: pds, Did: did, Url: url}
+	blob.Image = ip
+	blob.Source = BlobSource{Pds: pds, Did: did, Url: url, Mime: ct}
 	blob.Time = time.Now().Format(time.RFC3339)
 	blob.Version = IndexVersion
 
@@ -158,13 +170,22 @@ func (b *Blob) save(dir string) error {
 	path := b.FilePath(dir)
 
 	// write index
-	index, _ := json.MarshalIndent(b, "", "  ")
-	if err := ioutil.WriteFile(path+".json", index, 0644); err != nil {
+	if err := b.saveIndex(dir); err != nil {
+		return err
+	}
+
+	// write blob
+	if err := ioutil.WriteFile(path+".blob", b.Data, 0644); err != nil {
 		log.Println("Error: ", err)
 		return err
 	}
-	// write blob
-	if err := ioutil.WriteFile(path+".blob", b.Data, 0644); err != nil {
+	return nil
+}
+
+func (b *Blob) saveIndex(dir string) error {
+	path := b.FilePath(dir)
+	index, _ := json.MarshalIndent(b, "", "  ")
+	if err := ioutil.WriteFile(path+".json", index, 0644); err != nil {
 		log.Println("Error: ", err)
 		return err
 	}
@@ -204,9 +225,12 @@ func (b *Blob) fileLoad(dir string, ext string) ([]byte, error) {
 	return data, nil
 }
 
-func (b *Blob) Output(dir string, of string, ofc OutputFormatOptions) (BlobOutput, error) {
+func (b *Blob) Output(dir string, of *string, ofc *OutputFormatOptions) (BlobOutput, error) {
 	out := BlobOutput{}
-	if of == "webp" {
+
+	switch *of {
+	case "webp":
+		mime := "image/webp"
 		pr := ""
 		if ofc.Width != 0 {
 			pr = fmt.Sprintf("%vx%vpx.", ofc.Width, ofc.Height)
@@ -234,23 +258,34 @@ func (b *Blob) Output(dir string, of string, ofc OutputFormatOptions) (BlobOutpu
 				return out, err
 			}
 
+			ip, _ := image.GetProperties(mime, d, true)
+			b.Variants = append(b.Variants, BlobVariant{
+				Size:  len(d),
+				Mime:  mime,
+				Image: ip,
+				Time:  time.Now().Format(time.RFC3339),
+			})
+			b.saveIndex(dir)
 		}
-		out.ContentType = "image/webp"
+		out.ContentType = mime
 		out.Data = d
 		return out, nil
-	}
 
-	out.ContentType = b.Mime
-	out.Data = b.Data
-
-	if out.Data == nil {
-		d, err := b.fileLoad(dir, "blob")
-		if err != nil {
-			log.Printf("Error loading file [%v]: %v\n", b.Cid.String(), err)
-			return out, err
+	case "raw":
+		out.ContentType = b.Mime
+		out.Data = b.Data
+		if out.Data == nil {
+			d, err := b.fileLoad(dir, "blob")
+			if err != nil {
+				log.Printf("Error loading file [%v]: %v\n", b.Cid.String(), err)
+				return out, err
+			}
+			out.Data = d
 		}
-		out.Data = d
+	default:
+		return out, errors.New("Invalid format")
 	}
+
 	return out, nil
 }
 
