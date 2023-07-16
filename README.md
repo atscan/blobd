@@ -18,8 +18,8 @@ You can try the application at [blob.atscan.net](https://blob.atscan.net/did:plc
 ### Features
 
 - automatic blob discovery (using atscan api)
-- MIME type detection
-- on-fly image transfomations (webp, different resolutions)
+- MIME type detection ([supported types](https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md))
+- on-fly image transfomations (webp support)
 - file storage/cache
 - blob inspection endpoint
 
