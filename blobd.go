@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/urfave/cli/v2"
 
 	"github.com/atscan/blobd/blob"
@@ -49,6 +50,8 @@ func serve(cctx *cli.Context) error {
 	server := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
+	server.Use(cors.New())
+
 	dir := cctx.String("data-dir")
 	fmt.Printf("Data directory: %v\n", dir)
 
